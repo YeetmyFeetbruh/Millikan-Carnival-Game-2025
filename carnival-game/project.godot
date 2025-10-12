@@ -19,7 +19,8 @@ config/icon="res://icon.svg"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=3
+window/size/mode=2
+window/size/borderless=true
 window/stretch/mode="canvas_items"
 
 [input]
@@ -32,4 +33,5 @@ cutting={
 
 [rendering]
 
-renderer/rendering_method="mobile"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
