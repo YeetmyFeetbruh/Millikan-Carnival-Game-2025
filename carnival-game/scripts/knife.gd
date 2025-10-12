@@ -7,13 +7,20 @@ extends Node2D
 @onready var redx = $"../Redx"
 @onready var greenv = $"../Greenv"
 @onready var path: Path2D = $"../Path"
+@onready var jumpscare = $"../Control/VideoStreamPlayer"
+@onready var numba: Label = $"../Control/Accuracy/numba"
 const ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
 
+## Smallest distance where accuracy is considered 0
 @export var max_distance = 50.0
-
+## Minimum accuracy needed for a win. 0.0 = 0% 1.0 = 100%
+@export_range(0.0, 1.0) var accuracy_threshold = 0.8 
 var mouse_pos: Vector2
 var prevmousepos: Vector2
 var cutting = true
+var accuracy := 0.0
+var num_dists := 0
+var dist_sum := 0.0
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -32,32 +39,45 @@ func _input(_event):
 			knifehandle.rotation = angle
 			outline.add_point(mouse_pos) # do we need this outline anymore?
 			prevmousepos = mouse_pos
-		evaluate()
-	elif Input.is_action_just_released("cutting") and cutting: # problem here is that the user wins even if they dont finish this cirlce
+		update()
+	elif Input.is_action_just_released("cutting") and cutting:
 		knifeblade.show()
 		knifehandle.hide()
-		win()
+		evaluate()
 
-func evaluate(): # i think we should change this so that evaluate is only called once the circle is completed or the user stops cutting.
-				 # then if the user's accuracy is too low they lose.
-				 # if this is too hard to implement then we can go the maze game route.
+func update():
 	var dist = mouse_pos.distance_to(path.curve.get_closest_point(mouse_pos))
+	#if dist > max_distance:
+		#fail()
+	# Calculate average accuracy
+	num_dists += 1
+	dist_sum += dist
+	var average_dist = dist_sum / num_dists
+	accuracy = clampf(1.0 - (average_dist / max_distance), 0.0, 1.0) # float [0.0,1.0]
+	numba.text = str(snapped(accuracy * 100.0, 0.01)) + "%"
 	outline.self_modulate = ACCURACY_GRADIENT.sample(dist/max_distance)
-	#print(dist)
-	if dist > max_distance:
+	
+# TODO: evaluate when the cursor reaches where it started
+func evaluate():
+	if accuracy >= accuracy_threshold:
+		win()
+	else:
 		fail()
-		
+	
+
 func fail():
 	cutting = false
 	knifeblade.show()
 	knifehandle.hide()
 	await get_tree().create_timer(2.0).timeout
-	redx.show()
-	$"../sfx/fail".play()
-	await get_tree().create_timer(1.0).timeout
-	redx.hide()
-	outline.clear_points()
-	cutting = true
+	jumpscare.play()
+	jumpscare.show()
+	await jumpscare.finished
+	jumpscare.hide()
+	#redx.show()
+	#$"../sfx/fail".play()
+	#await get_tree().create_timer(1.0).timeout
+	reset()
 
 func win():
 	cutting = false
@@ -67,6 +87,14 @@ func win():
 	greenv.show()
 	$"../sfx/win".play()
 	await get_tree().create_timer(1.0).timeout
+	reset()
+	
+func reset():
+	redx.hide()
 	greenv.hide()
 	outline.clear_points()
 	cutting = true
+	accuracy = 0.0
+	num_dists = 0
+	dist_sum = 0
+	numba.text = "0.00%"

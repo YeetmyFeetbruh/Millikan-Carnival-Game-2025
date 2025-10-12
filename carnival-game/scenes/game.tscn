@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://duuwtb34yyfrf"]
+[gd_scene load_steps=20 format=3 uid="uid://duuwtb34yyfrf"]
 
 [ext_resource type="Script" uid="uid://dgonqv37nuuvg" path="res://scripts/OMEGASCRIPT.gd" id="1_iywne"]
 [ext_resource type="Texture2D" uid="uid://dlg47conda0ky" path="res://sprites/table.jpg" id="1_yqjtg"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://21lsh7k72077" path="res://sprites/dash.svg" id="10_vtaks"]
 [ext_resource type="AudioStream" uid="uid://bcvhu6gjt07eb" path="res://sfx/correct.mp3" id="11_kvuet"]
 [ext_resource type="Texture2D" uid="uid://csrx2o54fmcsb" path="res://sprites/checkmark.png" id="13_trtic"]
+[ext_resource type="Shader" uid="uid://upw7cdmdcj6x" path="res://misc/ChromaKeyShader.gdshader" id="14_trtic"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_u5sy4"]
 font_size = 71
@@ -25,6 +26,16 @@ font_color = Color(0, 0, 0, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_trtic"]
 font_size = 96
 font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ir15t"]
+resource_name = "ChromaKeyShader.gdshader"
+shader = ExtResource("14_trtic")
+shader_parameter/chroma_key_color = Color(0.043137256, 1, 0, 1)
+shader_parameter/pickup_range = 0.1
+shader_parameter/fade_amount = 1.0
+
+[sub_resource type="VideoStreamTheora" id="VideoStreamTheora_kvuet"]
+file = "misc/foxy.ogv"
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_iywne")
@@ -115,7 +126,14 @@ stream = ExtResource("8_gee14")
 [node name="win" type="AudioStreamPlayer2D" parent="sfx"]
 stream = ExtResource("11_kvuet")
 
-[node name="Accuracy" type="Label" parent="."]
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Accuracy" type="Label" parent="Control"]
+layout_mode = 0
 offset_left = 1596.0
 offset_top = 26.0
 offset_right = 1827.0
@@ -123,7 +141,7 @@ offset_bottom = 96.0
 text = "Accuracy"
 label_settings = SubResource("LabelSettings_kvuet")
 
-[node name="numba" type="Label" parent="Accuracy"]
+[node name="numba" type="Label" parent="Control/Accuracy"]
 layout_mode = 0
 offset_left = -12.0
 offset_top = 54.0
@@ -131,3 +149,14 @@ offset_right = 262.0
 offset_bottom = 200.0
 text = "0.00%"
 label_settings = SubResource("LabelSettings_trtic")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Control"]
+visible = false
+material = SubResource("ShaderMaterial_ir15t")
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+scale = Vector2(1.5, 1.5)
+stream = SubResource("VideoStreamTheora_kvuet")
+volume_db = -10.0
+expand = true

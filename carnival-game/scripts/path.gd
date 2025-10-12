@@ -8,6 +8,8 @@ var center = Vector2(1000, 550)
 func _ready():
 	curve = Curve2D.new()
 	curve.bake_interval = 5.0
+	# Generates a circle
+	# TODO: Non-geometric designs will have to be created manually
 	for i in num_points + 1:
 		var new_point = Vector2(0, -radius).rotated(float(i)/num_points * 2*PI) + center
 		curve.add_point(new_point)
