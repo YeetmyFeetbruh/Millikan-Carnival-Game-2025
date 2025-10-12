@@ -5,6 +5,7 @@ extends Node2D
 @onready var knifetimer = $knifetimer
 @onready var outline = $"../outline"
 @onready var redx = $"../Redx"
+@onready var greenv = $"../Greenv"
 @onready var path: Path2D = $"../Path"
 const ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
 
@@ -29,14 +30,17 @@ func _input(_event):
 		if prevmousepos.distance_to(mouse_pos)>20 and cutting:
 			var angle = prevmousepos.angle_to_point(mouse_pos) - PI/2
 			knifehandle.rotation = angle
-			outline.add_point(mouse_pos)
+			outline.add_point(mouse_pos) # do we need this outline anymore?
 			prevmousepos = mouse_pos
 		evaluate()
-	elif Input.is_action_just_released("cutting") and cutting:
+	elif Input.is_action_just_released("cutting") and cutting: # problem here is that the user wins even if they dont finish this cirlce
 		knifeblade.show()
 		knifehandle.hide()
+		win()
 
-func evaluate():
+func evaluate(): # i think we should change this so that evaluate is only called once the circle is completed or the user stops cutting.
+				 # then if the user's accuracy is too low they lose.
+				 # if this is too hard to implement then we can go the maze game route.
 	var dist = mouse_pos.distance_to(path.curve.get_closest_point(mouse_pos))
 	outline.self_modulate = ACCURACY_GRADIENT.sample(dist/max_distance)
 	#print(dist)
@@ -47,10 +51,22 @@ func fail():
 	cutting = false
 	knifeblade.show()
 	knifehandle.hide()
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(2.0).timeout
 	redx.show()
-	$"../AudioStreamPlayer2D".play()
+	$"../sfx/fail".play()
 	await get_tree().create_timer(1.0).timeout
 	redx.hide()
+	outline.clear_points()
+	cutting = true
+
+func win():
+	cutting = false
+	knifeblade.show()
+	knifehandle.hide()
+	await get_tree().create_timer(2.0).timeout
+	greenv.show()
+	$"../sfx/win".play()
+	await get_tree().create_timer(1.0).timeout
+	greenv.hide()
 	outline.clear_points()
 	cutting = true

@@ -1,39 +1,64 @@
-[gd_scene load_steps=13 format=3 uid="uid://duuwtb34yyfrf"]
+[gd_scene load_steps=17 format=3 uid="uid://duuwtb34yyfrf"]
 
 [ext_resource type="Script" uid="uid://dgonqv37nuuvg" path="res://scripts/OMEGASCRIPT.gd" id="1_iywne"]
 [ext_resource type="Texture2D" uid="uid://dlg47conda0ky" path="res://sprites/table.jpg" id="1_yqjtg"]
 [ext_resource type="Texture2D" uid="uid://clnmr7vtrghkv" path="res://sprites/pumpkin2.png" id="2_lnu2h"]
 [ext_resource type="Texture2D" uid="uid://taw3qtu8e5kx" path="res://sprites/knifehandle.svg" id="3_lbhrr"]
 [ext_resource type="Texture2D" uid="uid://oblfe0vm5eu4" path="res://sprites/knife.png" id="4_iywne"]
-[ext_resource type="Script" uid="uid://cjejt3bg1yokt" path="res://scenes/knife.gd" id="6_kvpfn"]
+[ext_resource type="Script" uid="uid://cjejt3bg1yokt" path="res://scripts/knife.gd" id="6_kvpfn"]
 [ext_resource type="Texture2D" uid="uid://bno402ia2mwwh" path="res://sprites/picasso.jpg" id="6_p57ef"]
 [ext_resource type="Texture2D" uid="uid://y5geru0ki04l" path="res://sprites/redx.png" id="7_u5sy4"]
 [ext_resource type="AudioStream" uid="uid://d0alvxlanp22a" path="res://sfx/wrong-answer-buzzer.mp3" id="8_gee14"]
 [ext_resource type="Script" uid="uid://docalrqxd88qr" path="res://scripts/path.gd" id="9_0tnpc"]
 [ext_resource type="Texture2D" uid="uid://21lsh7k72077" path="res://sprites/dash.svg" id="10_vtaks"]
+[ext_resource type="AudioStream" uid="uid://bcvhu6gjt07eb" path="res://sfx/correct.mp3" id="11_kvuet"]
+[ext_resource type="Texture2D" uid="uid://csrx2o54fmcsb" path="res://sprites/checkmark.png" id="13_trtic"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_u5sy4"]
 font_size = 71
 font_color = Color(0, 0, 0, 1)
 
+[sub_resource type="LabelSettings" id="LabelSettings_kvuet"]
+font_size = 51
+font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_trtic"]
+font_size = 96
+font_color = Color(0, 0, 0, 1)
+
 [node name="Game" type="Node2D"]
 script = ExtResource("1_iywne")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="background" type="Node2D" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="background"]
 offset_left = -10.0
 offset_top = -10.0
 offset_right = 1928.9402
 offset_bottom = 439.0
 
-[node name="Table" type="Sprite2D" parent="."]
+[node name="Table" type="Sprite2D" parent="background"]
 position = Vector2(1000, 1250)
 scale = Vector2(0.63851166, 0.5475328)
 texture = ExtResource("1_yqjtg")
 
-[node name="Pumpkin2" type="Sprite2D" parent="."]
+[node name="Pumpkin2" type="Sprite2D" parent="background"]
 position = Vector2(1000, 500)
 scale = Vector2(2.0819616, 2.081961)
 texture = ExtResource("2_lnu2h")
+
+[node name="Picasso" type="Sprite2D" parent="background"]
+position = Vector2(264.5, 347)
+scale = Vector2(0.37604168, 0.23541668)
+texture = ExtResource("6_p57ef")
+
+[node name="Label" type="Label" parent="background"]
+offset_left = 130.0
+offset_top = 74.0
+offset_right = 361.0
+offset_bottom = 171.0
+text = "DRAW:"
+label_settings = SubResource("LabelSettings_u5sy4")
 
 [node name="Path" type="Path2D" parent="."]
 script = ExtResource("9_0tnpc")
@@ -70,26 +95,39 @@ autostart = true
 
 [node name="outline" type="Line2D" parent="."]
 
-[node name="Label" type="Label" parent="."]
-offset_left = 130.0
-offset_top = 74.0
-offset_right = 361.0
-offset_bottom = 171.0
-text = "DRAW:"
-label_settings = SubResource("LabelSettings_u5sy4")
-
-[node name="Picasso" type="Sprite2D" parent="."]
-position = Vector2(264.5, 347)
-scale = Vector2(0.37604168, 0.23541668)
-texture = ExtResource("6_p57ef")
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource("8_gee14")
-
 [node name="Redx" type="Sprite2D" parent="."]
 visible = false
 position = Vector2(964, 515)
 scale = Vector2(0.28978625, 0.28978625)
 texture = ExtResource("7_u5sy4")
 
-[connection signal="timeout" from="knife/knifetimer" to="." method="_on_knifetimer_timeout"]
+[node name="Greenv" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(1033, 511)
+scale = Vector2(1.5696203, 1.5696201)
+texture = ExtResource("13_trtic")
+
+[node name="sfx" type="Node" parent="."]
+
+[node name="fail" type="AudioStreamPlayer2D" parent="sfx"]
+stream = ExtResource("8_gee14")
+
+[node name="win" type="AudioStreamPlayer2D" parent="sfx"]
+stream = ExtResource("11_kvuet")
+
+[node name="Accuracy" type="Label" parent="."]
+offset_left = 1596.0
+offset_top = 26.0
+offset_right = 1827.0
+offset_bottom = 96.0
+text = "Accuracy"
+label_settings = SubResource("LabelSettings_kvuet")
+
+[node name="numba" type="Label" parent="Accuracy"]
+layout_mode = 0
+offset_left = -12.0
+offset_top = 54.0
+offset_right = 262.0
+offset_bottom = 200.0
+text = "0.00%"
+label_settings = SubResource("LabelSettings_trtic")
