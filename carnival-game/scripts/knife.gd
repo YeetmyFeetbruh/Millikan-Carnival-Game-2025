@@ -9,35 +9,48 @@ extends Node2D
 @onready var path: Path2D = $"../Path"
 @onready var jumpscare = $"../Control/VideoStreamPlayer"
 @onready var numba: Label = $"../Control/Accuracy/numba"
-const ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
+var ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
 
 ## Smallest distance where accuracy is considered 0
 @export var max_distance = 50.0
 ## Minimum accuracy needed for a win. 0.0 = 0% 1.0 = 100%
 @export_range(0.0, 1.0) var accuracy_threshold = 0.8 
+## Distance before the knife is updated
+@export var knife_dist = 20
 var mouse_pos: Vector2
 var prevmousepos: Vector2
 var cutting = true
 var accuracy := 0.0
 var num_dists := 0
 var dist_sum := 0.0
+## Offset of closest point on path to where mouse was first held down
+var start_offset: float
+var prev_offset: float
+var curr_offset: float
+var laps_done := 0
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	# Make gradient reflect threshold
+	ACCURACY_GRADIENT.set_offset(1, (1.0 - accuracy_threshold) / 2.0) # Yellow
+	ACCURACY_GRADIENT.set_offset(2, 1.0 - accuracy_threshold)         # Red
 	
 func _process(_delta):
 	mouse_pos = get_global_mouse_position()
 	knife.global_position = mouse_pos
 
 func _input(_event):
+	if Input.is_action_just_pressed("cutting"):
+		start_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
+		prev_offset = start_offset
 	# knife stuff
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and cutting:
+	if Input.is_action_pressed("cutting") and cutting:
 		knifeblade.hide()
 		knifehandle.show()
-		if prevmousepos.distance_to(mouse_pos)>20 and cutting:
+		if prevmousepos.distance_to(mouse_pos) > knife_dist and cutting:
 			var angle = prevmousepos.angle_to_point(mouse_pos) - PI/2
 			knifehandle.rotation = angle
-			outline.add_point(mouse_pos) # do we need this outline anymore?
+			outline.add_point(mouse_pos)
 			prevmousepos = mouse_pos
 		update()
 	elif Input.is_action_just_released("cutting") and cutting:
@@ -55,9 +68,18 @@ func update():
 	var average_dist = dist_sum / num_dists
 	accuracy = clampf(1.0 - (average_dist / max_distance), 0.0, 1.0) # float [0.0,1.0]
 	numba.text = str(snapped(accuracy * 100.0, 0.01)) + "%"
-	outline.self_modulate = ACCURACY_GRADIENT.sample(dist/max_distance)
+	outline.self_modulate = ACCURACY_GRADIENT.sample(1.0 - accuracy)
+	# INFO: Basically checks if the difference between last and current position
+	# on the path is at least than half the length of the entire path. If so, we
+	# know that a lap has been made. Like a checkpoint in mario kart
+	curr_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
+	if curr_offset >= start_offset and laps_done > 0: # Carving is complete
+		evaluate()
+	if prev_offset - curr_offset >= path.curve.get_baked_length() / 2:
+		laps_done += 1
+		print("Laps done: " + str(laps_done))
+	prev_offset = curr_offset
 	
-# TODO: evaluate when the cursor reaches where it started
 func evaluate():
 	if accuracy >= accuracy_threshold:
 		win()
@@ -90,11 +112,12 @@ func win():
 	reset()
 	
 func reset():
-	redx.hide()
-	greenv.hide()
-	outline.clear_points()
-	cutting = true
-	accuracy = 0.0
-	num_dists = 0
-	dist_sum = 0
-	numba.text = "0.00%"
+	get_tree().reload_current_scene()
+	#redx.hide()
+	#greenv.hide()
+	#outline.clear_points()
+	#cutting = true
+	#accuracy = 0.0
+	#num_dists = 0
+	#dist_sum = 0
+	#numba.text = "0.00%"

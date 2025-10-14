@@ -55,7 +55,7 @@ texture = ExtResource("1_yqjtg")
 
 [node name="Pumpkin2" type="Sprite2D" parent="background"]
 position = Vector2(1000, 500)
-scale = Vector2(2.0819616, 2.081961)
+scale = Vector2(2, 2)
 texture = ExtResource("2_lnu2h")
 
 [node name="Picasso" type="Sprite2D" parent="background"]
@@ -83,9 +83,11 @@ texture = ExtResource("10_vtaks")
 texture_mode = 1
 joint_mode = 2
 
+[node name="outline" type="Line2D" parent="."]
+
 [node name="knife" type="Node2D" parent="."]
 script = ExtResource("6_kvpfn")
-max_distance = 25.0
+knife_dist = 10
 
 [node name="Knifehandle" type="Sprite2D" parent="knife"]
 visible = false
@@ -103,8 +105,6 @@ offset = Vector2(250, 200)
 [node name="knifetimer" type="Timer" parent="knife"]
 wait_time = 0.5
 autostart = true
-
-[node name="outline" type="Line2D" parent="."]
 
 [node name="Redx" type="Sprite2D" parent="."]
 visible = false
