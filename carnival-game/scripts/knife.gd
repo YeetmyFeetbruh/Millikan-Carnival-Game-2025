@@ -27,7 +27,6 @@ var dist_sum := 0.0
 var start_offset: float
 var prev_offset: float
 var curr_offset: float
-var laps_done := 0
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -52,7 +51,7 @@ func _input(_event):
 			knifehandle.rotation = angle
 			outline.add_point(mouse_pos)
 			prevmousepos = mouse_pos
-		update()
+			update()
 	elif Input.is_action_just_released("cutting") and cutting:
 		knifeblade.show()
 		knifehandle.hide()
@@ -60,8 +59,6 @@ func _input(_event):
 
 func update():
 	var dist = mouse_pos.distance_to(path.curve.get_closest_point(mouse_pos))
-	#if dist > max_distance:
-		#fail()
 	# Calculate average accuracy
 	num_dists += 1
 	dist_sum += dist
@@ -69,15 +66,14 @@ func update():
 	accuracy = clampf(1.0 - (average_dist / max_distance), 0.0, 1.0) # float [0.0,1.0]
 	numba.text = str(snapped(accuracy * 100.0, 0.01)) + "%"
 	outline.self_modulate = ACCURACY_GRADIENT.sample(1.0 - accuracy)
-	# INFO: Basically checks if the difference between last and current position
-	# on the path is at least than half the length of the entire path. If so, we
-	# know that a lap has been made. Like a checkpoint in mario kart
+	# This should work now I don't know what I was smoking before (please test)
 	curr_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
-	if curr_offset >= start_offset and laps_done > 0: # Carving is complete
+	var curr_direction = int(sign(curr_offset - prev_offset))
+	print(curr_direction)
+	if (((prev_offset < start_offset and curr_offset >= start_offset and curr_direction == 1) # Passed start clockwise
+	or (prev_offset > start_offset and curr_offset <= start_offset and curr_direction == -1)) # Passed start counterclockwise
+	and absf(curr_offset - prev_offset) < path.curve.get_baked_length()/2): # Ignores passing at offset 0
 		evaluate()
-	if prev_offset - curr_offset >= path.curve.get_baked_length() / 2:
-		laps_done += 1
-		print("Laps done: " + str(laps_done))
 	prev_offset = curr_offset
 	
 func evaluate():
