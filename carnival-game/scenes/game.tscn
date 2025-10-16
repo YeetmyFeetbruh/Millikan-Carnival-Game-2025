@@ -1,12 +1,14 @@
-[gd_scene load_steps=20 format=3 uid="uid://duuwtb34yyfrf"]
+[gd_scene load_steps=22 format=3 uid="uid://duuwtb34yyfrf"]
 
 [ext_resource type="Script" uid="uid://dgonqv37nuuvg" path="res://scripts/OMEGASCRIPT.gd" id="1_iywne"]
 [ext_resource type="Texture2D" uid="uid://dlg47conda0ky" path="res://sprites/table.jpg" id="1_yqjtg"]
 [ext_resource type="Texture2D" uid="uid://clnmr7vtrghkv" path="res://sprites/pumpkin2.png" id="2_lnu2h"]
 [ext_resource type="Texture2D" uid="uid://taw3qtu8e5kx" path="res://sprites/knifehandle.svg" id="3_lbhrr"]
 [ext_resource type="Texture2D" uid="uid://oblfe0vm5eu4" path="res://sprites/knife.png" id="4_iywne"]
+[ext_resource type="Curve2D" uid="uid://xqs2r4hj1l4s" path="res://designs/circle.tres" id="6_ir15t"]
 [ext_resource type="Script" uid="uid://cjejt3bg1yokt" path="res://scripts/knife.gd" id="6_kvpfn"]
 [ext_resource type="Texture2D" uid="uid://bno402ia2mwwh" path="res://sprites/picasso.jpg" id="6_p57ef"]
+[ext_resource type="Curve2D" uid="uid://c3wcruf638c4" path="res://designs/triangle.tres" id="7_ca42v"]
 [ext_resource type="Texture2D" uid="uid://y5geru0ki04l" path="res://sprites/redx.png" id="7_u5sy4"]
 [ext_resource type="AudioStream" uid="uid://d0alvxlanp22a" path="res://sfx/wrong-answer-buzzer.mp3" id="8_gee14"]
 [ext_resource type="Script" uid="uid://docalrqxd88qr" path="res://scripts/path.gd" id="9_0tnpc"]
@@ -73,8 +75,9 @@ label_settings = SubResource("LabelSettings_u5sy4")
 
 [node name="Path" type="Path2D" parent="."]
 script = ExtResource("9_0tnpc")
+designs = Array[Curve2D]([ExtResource("6_ir15t"), ExtResource("7_ca42v")])
 
-[node name="Line" type="Line2D" parent="."]
+[node name="DashedLine" type="Line2D" parent="."]
 texture_repeat = 2
 closed = true
 width = 40.0

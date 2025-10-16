@@ -17,6 +17,7 @@ var ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
 @export_range(0.0, 1.0) var accuracy_threshold = 0.8 
 ## Distance before the knife is updated
 @export var knife_dist = 20
+@export var prizes:Array[String] = ["2 Dum Dums", "1 Soda", "1 Candy Bag", "Meta Quest 2"]
 var mouse_pos: Vector2
 var prevmousepos: Vector2
 var cutting = true
@@ -27,6 +28,9 @@ var dist_sum := 0.0
 var start_offset: float
 var prev_offset: float
 var curr_offset: float
+var correct_direction: int
+var designs_completed := 0
+signal design_completed(next_design_index)
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -53,9 +57,7 @@ func _input(_event):
 			prevmousepos = mouse_pos
 			update()
 	elif Input.is_action_just_released("cutting") and cutting:
-		knifeblade.show()
-		knifehandle.hide()
-		evaluate()
+		fail()
 
 func update():
 	var dist = mouse_pos.distance_to(path.curve.get_closest_point(mouse_pos))
@@ -66,14 +68,17 @@ func update():
 	accuracy = clampf(1.0 - (average_dist / max_distance), 0.0, 1.0) # float [0.0,1.0]
 	numba.text = str(snapped(accuracy * 100.0, 0.01)) + "%"
 	outline.self_modulate = ACCURACY_GRADIENT.sample(1.0 - accuracy)
-	# This should work now I don't know what I was smoking before (please test)
+	# Evaluation
 	curr_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
 	var curr_direction = int(sign(curr_offset - prev_offset))
-	print(curr_direction)
-	if (((prev_offset < start_offset and curr_offset >= start_offset and curr_direction == 1) # Passed start clockwise
-	or (prev_offset > start_offset and curr_offset <= start_offset and curr_direction == -1)) # Passed start counterclockwise
-	and absf(curr_offset - prev_offset) < path.curve.get_baked_length()/2): # Ignores passing at offset 0
-		evaluate()
+	if absf(curr_offset - prev_offset) < path.curve.get_baked_length()/2:
+		if curr_direction != 0 and correct_direction == 0:
+			correct_direction = curr_direction
+		if prev_offset < start_offset and curr_offset >= start_offset or prev_offset > start_offset and curr_offset <= start_offset:
+			if curr_direction == correct_direction:
+				evaluate()
+			else:
+				correct_direction = curr_direction * -1
 	prev_offset = curr_offset
 	
 func evaluate():
@@ -81,23 +86,25 @@ func evaluate():
 		win()
 	else:
 		fail()
-	
 
 func fail():
 	cutting = false
 	knifeblade.show()
 	knifehandle.hide()
 	await get_tree().create_timer(2.0).timeout
-	jumpscare.play()
-	jumpscare.show()
-	await jumpscare.finished
-	jumpscare.hide()
-	#redx.show()
-	#$"../sfx/fail".play()
-	#await get_tree().create_timer(1.0).timeout
+	#jumpscare.play()
+	#jumpscare.show()
+	#await jumpscare.finished
+	#jumpscare.hide()
+	redx.show()
+	$"../sfx/fail".play()
+	await get_tree().create_timer(1.0).timeout
+	designs_completed = 0
 	reset()
+	game_over()
 
 func win():
+	designs_completed += 1
 	cutting = false
 	knifeblade.show()
 	knifehandle.hide()
@@ -106,14 +113,23 @@ func win():
 	$"../sfx/win".play()
 	await get_tree().create_timer(1.0).timeout
 	reset()
+	if designs_completed >= path.get("designs").size():
+		game_over()
+	else: 
+		design_completed.emit(designs_completed)
+	
+func game_over():
+	print("You win " + str(prizes[designs_completed])) # Replace with UI
 	
 func reset():
-	get_tree().reload_current_scene()
-	#redx.hide()
-	#greenv.hide()
-	#outline.clear_points()
-	#cutting = true
-	#accuracy = 0.0
-	#num_dists = 0
-	#dist_sum = 0
-	#numba.text = "0.00%"
+	redx.hide()
+	greenv.hide()
+	outline.clear_points()
+	cutting = true
+	accuracy = 0.0
+	num_dists = 0
+	dist_sum = 0
+	numba.text = "0.00%"
+	correct_direction = 0
+	curr_offset = 0.0
+	prev_offset = 0.0
