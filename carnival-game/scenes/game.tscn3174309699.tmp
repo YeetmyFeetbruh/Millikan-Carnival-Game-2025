@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://duuwtb34yyfrf"]
+[gd_scene load_steps=25 format=3 uid="uid://duuwtb34yyfrf"]
 
 [ext_resource type="Script" uid="uid://dgonqv37nuuvg" path="res://scripts/OMEGASCRIPT.gd" id="1_iywne"]
 [ext_resource type="Texture2D" uid="uid://dlg47conda0ky" path="res://sprites/table.jpg" id="1_yqjtg"]
@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://taw3qtu8e5kx" path="res://sprites/knifehandle.svg" id="3_lbhrr"]
 [ext_resource type="Texture2D" uid="uid://oblfe0vm5eu4" path="res://sprites/knife.png" id="4_iywne"]
 [ext_resource type="Curve2D" uid="uid://dpov4tjgwm8rc" path="res://designs/maze.tres" id="5_264po"]
-[ext_resource type="Curve2D" uid="uid://1q1yrcug11w1" path="res://designs/umbrella.tres" id="5_ssvqc"]
+[ext_resource type="Curve2D" uid="uid://c4qy2i2ohefhw" path="res://designs/umbrella.tres" id="5_ssvqc"]
 [ext_resource type="Curve2D" uid="uid://xqs2r4hj1l4s" path="res://designs/circle.tres" id="6_ir15t"]
 [ext_resource type="Script" uid="uid://cjejt3bg1yokt" path="res://scripts/knife.gd" id="6_kvpfn"]
 [ext_resource type="Texture2D" uid="uid://bno402ia2mwwh" path="res://sprites/picasso.jpg" id="6_p57ef"]
@@ -19,8 +19,6 @@
 [ext_resource type="Texture2D" uid="uid://csrx2o54fmcsb" path="res://sprites/checkmark.png" id="13_trtic"]
 [ext_resource type="Shader" uid="uid://upw7cdmdcj6x" path="res://misc/ChromaKeyShader.gdshader" id="14_trtic"]
 [ext_resource type="Texture2D" uid="uid://c15m6cb1v3fhs" path="res://sprites/umbrellaere.jpg" id="17_rysoc"]
-[ext_resource type="AudioStream" uid="uid://dbxtjd5tlq853" path="res://sfx/children-yaysound-effect.mp3" id="18_1kice"]
-[ext_resource type="AudioStream" uid="uid://mil8gie1ptmx" path="res://sfx/halloween-spooky-music-413648.mp3" id="19_5newe"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_u5sy4"]
 font_size = 71
@@ -43,51 +41,6 @@ shader_parameter/fade_amount = 1.0
 
 [sub_resource type="VideoStreamTheora" id="VideoStreamTheora_kvuet"]
 file = "misc/foxy.ogv"
-
-[sub_resource type="LabelSettings" id="LabelSettings_5newe"]
-font_size = 111
-outline_size = 55
-outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5newe"]
-bg_color = Color(1, 1, 1, 1)
-border_width_left = 10
-border_width_top = 10
-border_width_right = 10
-border_width_bottom = 10
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_37s47"]
-bg_color = Color(0.2592937, 0.2592937, 0.2592937, 1)
-border_width_left = 10
-border_width_top = 10
-border_width_right = 10
-border_width_bottom = 10
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bt5mj"]
-bg_color = Color(0.5489626, 0.5489626, 0.54896253, 1)
-border_width_left = 10
-border_width_top = 10
-border_width_right = 10
-border_width_bottom = 10
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5newe"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_37s47"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_iywne")
@@ -124,8 +77,10 @@ text = "DRAW:"
 label_settings = SubResource("LabelSettings_u5sy4")
 
 [node name="Path" type="Path2D" parent="."]
+position = Vector2(-488, -286)
+scale = Vector2(1.4691733, 1.4691736)
 script = ExtResource("9_0tnpc")
-designs = Array[Curve2D]([ExtResource("7_ca42v"), ExtResource("6_ir15t"), ExtResource("5_ssvqc"), ExtResource("5_264po")])
+designs = Array[Curve2D]([ExtResource("6_ir15t"), ExtResource("7_ca42v"), ExtResource("5_ssvqc"), ExtResource("5_264po")])
 
 [node name="DashedLine" type="Line2D" parent="."]
 texture_repeat = 2
@@ -142,7 +97,6 @@ joint_mode = 2
 script = ExtResource("6_kvpfn")
 knife_dist = 10
 prizes = Array[String](["Nothing", "2 Dum Dums", "1 Soda", "1 Candy Bag", "Meta Quest 2"])
-times = Array[int]([12, 15, 20, 30])
 
 [node name="Knifehandle" type="Sprite2D" parent="knife"]
 visible = false
@@ -181,12 +135,6 @@ stream = ExtResource("8_gee14")
 [node name="win" type="AudioStreamPlayer2D" parent="sfx"]
 stream = ExtResource("11_kvuet")
 
-[node name="cheer" type="AudioStreamPlayer2D" parent="sfx"]
-stream = ExtResource("18_1kice")
-
-[node name="music" type="AudioStreamPlayer2D" parent="sfx"]
-stream = ExtResource("19_5newe")
-
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
@@ -222,64 +170,9 @@ stream = SubResource("VideoStreamTheora_kvuet")
 volume_db = -10.0
 expand = true
 
-[node name="Reward" type="Label" parent="Control"]
-visible = false
-layout_mode = 0
-offset_top = 483.0
-offset_right = 1920.0
-offset_bottom = 654.0
-text = "YOU WIN: PLACEHOLDER"
-label_settings = SubResource("LabelSettings_5newe")
-horizontal_alignment = 1
-
-[node name="GameOver" type="Control" parent="Control"]
-visible = false
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Label" type="Label" parent="Control/GameOver"]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 750.0
-text = "PLAY AGAIN?
-1 TICKET"
-label_settings = SubResource("LabelSettings_5newe")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Button" type="Button" parent="Control/GameOver"]
-layout_mode = 0
-offset_left = 830.0
-offset_top = 578.0
-offset_right = 1134.0
-offset_bottom = 670.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 51
-theme_override_styles/normal = SubResource("StyleBoxFlat_5newe")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_37s47")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bt5mj")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_5newe")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_37s47")
-text = "START"
-
-[node name="countdown" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = 75.0
-offset_right = 1929.0
-offset_bottom = 152.0
-text = "15s"
-label_settings = SubResource("LabelSettings_5newe")
-horizontal_alignment = 1
-
-[node name="Timer" type="Timer" parent="Control/countdown"]
-
 [node name="Umbrellaere" type="Sprite2D" parent="."]
 visible = false
 modulate = Color(1, 1, 1, 0.1764706)
 position = Vector2(1008, 567.00006)
-scale = Vector2(0.9592188, 0.9592188)
+scale = Vector2(0.76533955, 0.76533955)
 texture = ExtResource("17_rysoc")
-
-[connection signal="pressed" from="Control/GameOver/Button" to="." method="_on_button_pressed"]
-[connection signal="timeout" from="Control/countdown/Timer" to="knife" method="_on_timer_timeout"]

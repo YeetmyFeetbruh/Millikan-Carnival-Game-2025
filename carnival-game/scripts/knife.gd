@@ -9,15 +9,21 @@ extends Node2D
 @onready var path: Path2D = $"../Path"
 @onready var jumpscare = $"../Control/VideoStreamPlayer"
 @onready var numba: Label = $"../Control/Accuracy/numba"
+@onready var reward = $"../Control/Reward"
+@onready var game_over = $"../Control/GameOver"
+@onready var countdown = $"../Control/countdown"
+@onready var timer = $"../Control/countdown/Timer"
+@onready var music = $"../sfx/music"
 var ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
 
 ## Smallest distance where accuracy is considered 0
 @export var max_distance = 50.0
 ## Minimum accuracy needed for a win. 0.0 = 0% 1.0 = 100%
-@export_range(0.0, 1.0) var accuracy_threshold = 0.8 
+@export_range(0.0, 1.0) var accuracy_threshold = 0.9 # changed to 90% cause game way to easy
 ## Distance before the knife is updated
 @export var knife_dist = 20
 @export var prizes:Array[String] = ["2 Dum Dums", "1 Soda", "1 Candy Bag", "Meta Quest 2"]
+@export var times:Array[int] = []
 var mouse_pos: Vector2
 var prevmousepos: Vector2
 var cutting = true
@@ -37,6 +43,7 @@ func _ready():
 	# Make gradient reflect threshold
 	ACCURACY_GRADIENT.set_offset(1, (1.0 - accuracy_threshold) / 2.0) # Yellow
 	ACCURACY_GRADIENT.set_offset(2, 1.0 - accuracy_threshold)         # Red
+	reset()
 	
 func _process(_delta):
 	mouse_pos = get_global_mouse_position()
@@ -58,6 +65,8 @@ func _input(_event):
 			update()
 	elif Input.is_action_just_released("cutting") and cutting:
 		fail()
+	if Input.is_key_pressed(KEY_T):
+		win()
 
 func update():
 	var dist = mouse_pos.distance_to(path.curve.get_closest_point(mouse_pos))
@@ -88,6 +97,8 @@ func evaluate():
 		fail()
 
 func fail():
+	music.stream_paused = true
+	timer.stop()
 	cutting = false
 	knifeblade.show()
 	knifehandle.hide()
@@ -99,11 +110,20 @@ func fail():
 	redx.show()
 	$"../sfx/fail".play()
 	await get_tree().create_timer(1.0).timeout
+	$"../sfx/cheer".play()
+	redx.hide()
+	await get_tree().create_timer(1.0).timeout
+	reward.show()
+	reward.text = "YOU WIN: "+str(prizes[designs_completed])
+	await get_tree().create_timer(2.0).timeout
 	designs_completed = 0
-	reset()
-	game_over()
+	reward.hide()
+	game_over.show()
+	music.stream_paused = false
 
 func win():
+	music.stream_paused = true
+	timer.stop()
 	designs_completed += 1
 	cutting = false
 	knifeblade.show()
@@ -112,16 +132,16 @@ func win():
 	greenv.show()
 	$"../sfx/win".play()
 	await get_tree().create_timer(1.0).timeout
+	music.stream_paused = false
 	reset()
 	if designs_completed >= path.get("designs").size():
-		game_over()
+		pass #how
 	else: 
 		design_completed.emit(designs_completed)
 	
-func game_over():
-	print("You win " + str(prizes[designs_completed])) # Replace with UI
 	
 func reset():
+	game_over.hide()
 	redx.hide()
 	greenv.hide()
 	outline.clear_points()
@@ -133,3 +153,13 @@ func reset():
 	correct_direction = 0
 	curr_offset = 0.0
 	prev_offset = 0.0
+	seconds = times[designs_completed]
+	timer.start()
+	
+
+var seconds = 0
+func _on_timer_timeout():
+	countdown.text = str(seconds)+"s"
+	seconds -= 1
+	if seconds == -1:
+		fail()
