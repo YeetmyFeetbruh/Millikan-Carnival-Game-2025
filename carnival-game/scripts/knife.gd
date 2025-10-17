@@ -10,9 +10,10 @@ extends Node2D
 @onready var jumpscare = $"../Control/VideoStreamPlayer"
 @onready var numba: Label = $"../Control/Accuracy/numba"
 @onready var reward = $"../Control/Reward"
-@onready var game_over = $"../Control/GameOver"
+@onready var game_over_label = $"../Control/GameOver"
 @onready var countdown = $"../Control/countdown"
 @onready var timer = $"../Control/countdown/Timer"
+@onready var ambient = $"../sfx/ambient"
 @onready var music = $"../sfx/music"
 var ACCURACY_GRADIENT = preload("uid://7kncgva66po5")
 
@@ -36,14 +37,15 @@ var prev_offset: float
 var curr_offset: float
 var correct_direction: int
 var designs_completed := 0
+var jumpscare_time:float
 signal design_completed(next_design_index)
 
 func _ready():
+	countdown.text = str(times[designs_completed])+"s"
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	# Make gradient reflect threshold
 	ACCURACY_GRADIENT.set_offset(1, (1.0 - accuracy_threshold) / 2.0) # Yellow
-	ACCURACY_GRADIENT.set_offset(2, 1.0 - accuracy_threshold)         # Red
-	reset()
+	#ACCURACY_GRADIENT.set_offset(2, 1.0 - accuracy_threshold)         # Red
 	
 func _process(_delta):
 	mouse_pos = get_global_mouse_position()
@@ -51,6 +53,11 @@ func _process(_delta):
 
 func _input(_event):
 	if Input.is_action_just_pressed("cutting"):
+		if !music.playing:
+			ambient.stop()
+			music.play()
+		reset()
+		timer.start()
 		start_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
 		prev_offset = start_offset
 	# knife stuff
@@ -65,7 +72,7 @@ func _input(_event):
 			update()
 	elif Input.is_action_just_released("cutting") and cutting:
 		fail()
-	if Input.is_key_pressed(KEY_T):
+	if Input.is_action_just_pressed("win"):
 		win()
 
 func update():
@@ -95,6 +102,12 @@ func evaluate():
 		win()
 	else:
 		fail()
+		
+func play_jumpscare():
+	jumpscare.play()
+	jumpscare.show()
+	await jumpscare.finished
+	jumpscare.hide()
 
 func fail():
 	music.stream_paused = true
@@ -103,23 +116,11 @@ func fail():
 	knifeblade.show()
 	knifehandle.hide()
 	await get_tree().create_timer(2.0).timeout
-	#jumpscare.play()
-	#jumpscare.show()
-	#await jumpscare.finished
-	#jumpscare.hide()
 	redx.show()
 	$"../sfx/fail".play()
 	await get_tree().create_timer(1.0).timeout
-	$"../sfx/cheer".play()
 	redx.hide()
-	await get_tree().create_timer(1.0).timeout
-	reward.show()
-	reward.text = "YOU WIN: "+str(prizes[designs_completed])
-	await get_tree().create_timer(2.0).timeout
-	designs_completed = 0
-	reward.hide()
-	game_over.show()
-	music.stream_paused = false
+	game_over()
 
 func win():
 	music.stream_paused = true
@@ -135,13 +136,25 @@ func win():
 	music.stream_paused = false
 	reset()
 	if designs_completed >= path.get("designs").size():
-		pass #how
+		game_over()
 	else: 
 		design_completed.emit(designs_completed)
 	
+func game_over():
+	$"../sfx/cheer".play()
+	await get_tree().create_timer(1.0).timeout
+	reward.show()
+	reward.text = "YOU WIN: " + str(prizes[designs_completed])
+	await get_tree().create_timer(2.0).timeout
+	designs_completed = 0
+	reward.hide()
+	game_over_label.show()
+	music.stream_paused = false
 	
 func reset():
-	game_over.hide()
+	countdown.text = str(times[designs_completed])+"s"
+	jumpscare_time = randf_range(0.0, float(times.back()))
+	game_over_label.hide()
 	redx.hide()
 	greenv.hide()
 	outline.clear_points()
@@ -154,11 +167,12 @@ func reset():
 	curr_offset = 0.0
 	prev_offset = 0.0
 	seconds = times[designs_completed]
-	timer.start()
 	
 
 var seconds = 0
 func _on_timer_timeout():
+	if designs_completed == 3 and seconds == jumpscare_time:
+		play_jumpscare()
 	countdown.text = str(seconds)+"s"
 	seconds -= 1
 	if seconds == -1:

@@ -13,7 +13,6 @@ func _ready():
 	set_design(0)
 		
 func set_design(index):
-	print("Changed design to " + str(index))
 	curr_design = designs[index]
 	curve = curr_design
 	#curve.bake_interval = 5.0
