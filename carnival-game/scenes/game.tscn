@@ -269,7 +269,7 @@ horizontal_alignment = 1
 script = ExtResource("6_kvpfn")
 knife_dist = 5
 prizes = Array[String](["Nothing", "2 Dum Dums", "1 Soda", "1 Candy Bag", "Meta Quest 2"])
-times = Array[int]([12, 15, 20, 30])
+times = Array[int]([10, 10, 15, 20])
 
 [node name="Knifehandle" type="Sprite2D" parent="knife"]
 visible = false

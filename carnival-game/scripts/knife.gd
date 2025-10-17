@@ -37,14 +37,14 @@ var prev_offset: float
 var curr_offset: float
 var correct_direction: int
 var designs_completed := 0
-var jumpscare_time:float
+var jumpscare_time:int
 signal design_completed(next_design_index)
 
 func _ready():
 	countdown.text = str(times[designs_completed])+"s"
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	# Make gradient reflect threshold
-	ACCURACY_GRADIENT.set_offset(1, (1.0 - accuracy_threshold) / 2.0) # Yellow
+	ACCURACY_GRADIENT.set_offset(1, (1.0 - accuracy_threshold) / 2.0)  # Yellow
 	#ACCURACY_GRADIENT.set_offset(2, 1.0 - accuracy_threshold)         # Red
 	
 func _process(_delta):
@@ -156,8 +156,8 @@ func game_over():
 	game_over_label.show()
 	
 func reset():
-	countdown.text = str(times[designs_completed])+"s"
-	jumpscare_time = randf_range(0.0, float(times.back()))
+	countdown.text = str(times[clampi(designs_completed, 0, 3)])+"s"
+	jumpscare_time = randi_range(0, times.back())
 	game_over_label.hide()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	show()
