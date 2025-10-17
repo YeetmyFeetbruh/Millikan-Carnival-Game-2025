@@ -51,29 +51,31 @@ func _process(_delta):
 	mouse_pos = get_global_mouse_position()
 	knife.global_position = mouse_pos
 
+var lost = false
 func _input(_event):
-	if Input.is_action_just_pressed("cutting"):
-		if !music.playing:
-			ambient.stop()
-			music.play()
-		reset()
-		timer.start()
-		start_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
-		prev_offset = start_offset
-	# knife stuff
-	if Input.is_action_pressed("cutting") and cutting:
-		knifeblade.hide()
-		knifehandle.show()
-		if prevmousepos.distance_to(mouse_pos) > knife_dist and cutting:
-			var angle = prevmousepos.angle_to_point(mouse_pos) - PI/2
-			knifehandle.rotation = angle
-			outline.add_point(mouse_pos)
-			prevmousepos = mouse_pos
-			update()
-	elif Input.is_action_just_released("cutting") and cutting:
-		fail()
-	if Input.is_action_just_pressed("win"):
-		win()
+	if not lost:
+		if Input.is_action_just_pressed("cutting"):
+			if !music.playing:
+				ambient.stop()
+				music.play()
+			reset()
+			timer.start()
+			start_offset = path.curve.get_closest_offset(path.curve.get_closest_point(mouse_pos))
+			prev_offset = start_offset
+		# knife stuff
+		if Input.is_action_pressed("cutting") and cutting:
+			knifeblade.hide()
+			knifehandle.show()
+			if prevmousepos.distance_to(mouse_pos) > knife_dist and cutting:
+				var angle = prevmousepos.angle_to_point(mouse_pos) - PI/2
+				knifehandle.rotation = angle
+				outline.add_point(mouse_pos)
+				prevmousepos = mouse_pos
+				update()
+		elif Input.is_action_just_released("cutting") and cutting:
+			fail()
+		if Input.is_action_just_pressed("win"):
+			win()
 
 func update():
 	var dist = mouse_pos.distance_to(path.curve.get_closest_point(mouse_pos))
@@ -110,6 +112,7 @@ func play_jumpscare():
 	jumpscare.hide()
 
 func fail():
+	lost = true
 	music.stream_paused = true
 	timer.stop()
 	cutting = false
@@ -141,6 +144,8 @@ func win():
 		design_completed.emit(designs_completed)
 	
 func game_over():
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	hide()
 	$"../sfx/cheer".play()
 	await get_tree().create_timer(1.0).timeout
 	reward.show()
@@ -149,12 +154,13 @@ func game_over():
 	designs_completed = 0
 	reward.hide()
 	game_over_label.show()
-	music.stream_paused = false
 	
 func reset():
 	countdown.text = str(times[designs_completed])+"s"
 	jumpscare_time = randf_range(0.0, float(times.back()))
 	game_over_label.hide()
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	show()
 	redx.hide()
 	greenv.hide()
 	outline.clear_points()
